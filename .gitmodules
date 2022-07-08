@@ -1,0 +1,3 @@
+[submodule "WikiDataIntegration"]
+	path = WikiDataIntegration
+	url = https://github.com/collectiveaccess/WikiDataIntegration.git
