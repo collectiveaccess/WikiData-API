@@ -35,7 +35,7 @@ def read_root():
     return JSONResponse(content=content, headers=headers)
 
 
-@app.get("/fetch_wikidata_item/{item_id}")
+@app.get("/wikidata_item/{item_id}")
 def read_wikidata_item(item_id: str):
     # check for invalid item_id
     if not re.search(r"^Q[0-9]+$", item_id):
@@ -64,93 +64,6 @@ def read_search(keyword: str):
         content = wd.search_keyword(site, keyword)
     else:
         content = []
-
-    return JSONResponse(content=content, headers=headers)
-
-
-class WikidataItem(BaseModel):
-    item_id: str
-    item_label: str
-    item_data: dict
-
-
-def read_data_json(f, emptyFileResponse):
-    try:
-        return json.load(f)
-    except json.decoder.JSONDecodeError as err:
-        # file has no content
-        if err.msg == "Expecting value":
-            return emptyFileResponse
-        else:
-            raise HTTPException(status_code=500, detail=err.msg)
-
-
-def save_item(data):
-    # TODO: update save functionality
-    filepath = Path("data", "wiki_imports.json")
-
-    with open(filepath, "r") as f:
-        records = read_data_json(f, {})
-
-    records[data.item_id] = {
-        "id": data.item_id,
-        "label": data.item_label,
-        "data": data.item_data,
-    }
-
-    with open(filepath, "w") as f:
-        json_object = json.dumps(records, indent=2)
-        f.write(json_object)
-
-
-@app.post("/import_wikidata")
-def import_wikidata(data: WikidataItem):
-    save_item(data)
-
-    content = {"message": f"record imported: {data.item_id} {data.item_label}"}
-    return JSONResponse(content=content, headers=headers)
-
-
-@app.get("/items/{id}")
-def read_one_item(id: str):
-    filepath = Path("data", "wiki_imports.json")
-
-    with open(filepath, "r") as f:
-        records = read_data_json(f, {})
-
-        if id in records:
-            content = records[id]
-        else:
-            raise HTTPException(status_code=404, detail="Item not found")
-
-    return JSONResponse(content=content, headers=headers)
-
-
-@app.get("/items")
-def read_all_items():
-    filepath = Path("data", "wiki_imports.json")
-
-    with open(filepath, "r") as f:
-        records = read_data_json(f, [])
-        if len(records) > 0:
-            content = [
-                {"id": values["id"], "label": values["label"]}
-                for values in records.values()
-            ]
-        else:
-            content = []
-
-    return JSONResponse(content=content, headers=headers)
-
-
-@app.delete("/items")
-def delete_all_items():
-    filepath = Path("data", "wiki_imports.json")
-
-    with open(filepath, "w") as f:
-        f.write("")
-
-    content = {"message": "records deleted"}
 
     return JSONResponse(content=content, headers=headers)
 
