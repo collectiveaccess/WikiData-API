@@ -74,3 +74,17 @@ def all_props_for_ids(ids):
     content = wd.fetch_and_format_menu_options(ids_list)
 
     return JSONResponse(content=content, headers=headers)
+
+class WikidataId(BaseModel):
+    qid: str
+
+@app.post("/copy_wikidata_item")
+def copy_wikidata_item(data: WikidataId):
+    local_site = pywikibot.Site("en", "cawiki")
+    site = pywikibot.Site("wikidata", "wikidata")
+    results = wd.import_wikidata_item_to_local_wikibase(data.qid, site, local_site)
+
+    content = {
+        "message": f"{results['label']} {results['id']} added to local Wikibase"
+    }
+    return JSONResponse(content=content, headers=headers)
