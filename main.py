@@ -3,12 +3,15 @@ from pathlib import Path
 import re
 import json
 
+from dotenv import load_dotenv
+load_dotenv()
 import pywikibot
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import WikiDataIntegration as wd
+from PyImporter import format_edit_mutation, api_edit
 
 app = FastAPI()
 
@@ -77,14 +80,26 @@ def all_props_for_ids(ids):
 
 class WikidataId(BaseModel):
     qid: str
+    ca_id: str
 
 @app.post("/copy_wikidata_item")
 def copy_wikidata_item(data: WikidataId):
     local_site = pywikibot.Site("en", "cawiki")
     site = pywikibot.Site("wikidata", "wikidata")
+
     results = wd.import_wikidata_item_to_local_wikibase(data.qid, site, local_site)
 
+    update_entity(results['id'], data.ca_id)
     content = {
         "message": f"{results['label']} {results['id']} added to local Wikibase"
     }
     return JSONResponse(content=content, headers=headers)
+
+def update_entity(qid, ca_id):
+    table = 'ca_entities'
+    identifier = ca_id
+    # TODO: change field from notes to ???
+    bundles = f'{{name: "notes", value: "{qid}"}}'
+    update_identifier_type = 'id'
+    query = format_edit_mutation(table, identifier, bundles, update_identifier_type)
+    api_edit(query)

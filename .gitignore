@@ -166,3 +166,4 @@ pywikibot.lwp
 throttle.ctrl
 families/*_family.py
 secrets.json
+user-config.py
