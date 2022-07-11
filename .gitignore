@@ -165,3 +165,4 @@ apicache-py3/*
 pywikibot.lwp
 throttle.ctrl
 families/*_family.py
+secrets.json

@@ -1,3 +1,6 @@
 [submodule "WikiDataIntegration"]
 	path = WikiDataIntegration
 	url = https://github.com/collectiveaccess/WikiDataIntegration.git
+[submodule "PyImporter"]
+	path = PyImporter
+	url = git@github.com:collectiveaccess/PyImporter.git
