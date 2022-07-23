@@ -1,5 +1,3 @@
-import sys
-from pathlib import Path
 import re
 import json
 
@@ -78,28 +76,45 @@ def all_props_for_ids(ids):
 
     return JSONResponse(content=content, headers=headers)
 
+
 class WikidataId(BaseModel):
     qid: str
     ca_id: str
+    table: str
+    type: str
+
 
 @app.post("/copy_wikidata_item")
 def copy_wikidata_item(data: WikidataId):
     local_site = pywikibot.Site("en", "cawiki")
     site = pywikibot.Site("wikidata", "wikidata")
 
+    # results['id'] is wikibase qid
     results = wd.import_wikidata_item_to_local_wikibase(data.qid, site, local_site)
 
-    update_entity(results['id'], data.ca_id)
+    # save wikibase qid to CollectiveAccess record.
+    if data.table == 'ca_entities':
+        update_entity(data.table, results['id'], data.ca_id)
+    elif data.table == 'ca_occurrences':
+        update_occurrence(data.table, results['id'], data.ca_id)
+
     content = {
         "message": f"{results['label']} {results['id']} added to local Wikibase"
     }
     return JSONResponse(content=content, headers=headers)
 
-def update_entity(qid, ca_id):
-    table = 'ca_entities'
-    identifier = ca_id
+
+def update_entity(table, qid, ca_id):
     # TODO: change field from notes to ???
-    bundles = f'{{name: "notes", value: "{qid}"}}'
+    bundles = f'{{name: "internal_notes", value: "{qid}"}}'
     update_identifier_type = 'id'
-    query = format_edit_mutation(table, identifier, bundles, update_identifier_type)
+    query = format_edit_mutation(table, ca_id, bundles, update_identifier_type)
+    api_edit(query)
+
+
+def update_occurrence(table, qid, ca_id):
+    # TODO: change field from notes to ???
+    bundles = f'{{name: "internal_notes", value: "{qid}"}}'
+    update_identifier_type = 'id'
+    query = format_edit_mutation(table, ca_id, bundles, update_identifier_type)
     api_edit(query)
