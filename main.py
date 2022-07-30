@@ -105,16 +105,14 @@ def copy_wikidata_item(data: WikidataId):
 
 
 def update_entity(table, qid, ca_id):
-    # TODO: change field from notes to ???
-    bundles = f'{{name: "internal_notes", value: "{qid}"}}'
+    bundles = f'{{name: "authority_wiki_data", value: "{qid}"}}'
     update_identifier_type = 'id'
     query = format_edit_mutation(table, ca_id, bundles, update_identifier_type)
     api_edit(query)
 
 
 def update_occurrence(table, qid, ca_id):
-    # TODO: change field from notes to ???
-    bundles = f'{{name: "internal_notes", value: "{qid}"}}'
+    bundles = f'{{name: "authority_wiki_data", value: "{qid}"}}'
     update_identifier_type = 'id'
     query = format_edit_mutation(table, ca_id, bundles, update_identifier_type)
     api_edit(query)
