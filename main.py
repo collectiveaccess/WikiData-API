@@ -88,6 +88,8 @@ class WikidataId(BaseModel):
 def copy_wikidata_item(data: WikidataId):
     local_site = pywikibot.Site("en", "cawiki")
     site = pywikibot.Site("wikidata", "wikidata")
+    wd.login(local_site)
+    wd.login(site)
 
     # results['id'] is wikibase qid
     results = wd.import_wikidata_item_to_local_wikibase(data.qid, site, local_site)
