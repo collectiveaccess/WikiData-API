@@ -39,6 +39,7 @@ def read_root():
 
 @app.get("/wikidata_item/{item_id}")
 def read_wikidata_item(item_id: str):
+    """return data for one wikidata item"""
     # check for invalid item_id
     if not re.search(r"^Q[0-9]+$", item_id):
         raise HTTPException(status_code=404, detail="Item not found")
@@ -49,6 +50,7 @@ def read_wikidata_item(item_id: str):
 
 @app.get("/wikibase_item/{item_id}")
 def read_wikibase_item(item_id: str):
+    """return data for one wikibase item"""
     if not re.search(r"^Q[0-9]+$", item_id):
         raise HTTPException(status_code=404, detail="Item not found")
 
@@ -83,14 +85,6 @@ def read_search(keyword: str):
     return JSONResponse(content=content, headers=headers)
 
 
-@app.get("/get_menu_options")
-def all_props_for_ids(ids):
-    ids_list = ids.split("|")
-    content = wd.fetch_and_format_menu_options(ids_list)
-
-    return JSONResponse(content=content, headers=headers)
-
-
 class WikidataId(BaseModel):
     qid: str
     ca_id: str
@@ -100,6 +94,7 @@ class WikidataId(BaseModel):
 
 @app.post("/copy_wikidata_item")
 def copy_wikidata_item(data: WikidataId):
+    """copy wikidata item to local wikibase"""
     local_site = pywikibot.Site("en", "cawiki")
     site = pywikibot.Site("wikidata", "wikidata")
     wd.login(local_site)
@@ -141,6 +136,7 @@ class WikiItem(BaseModel):
 
 @app.post("/create_wiki_item")
 def create_wiki_item(data: WikiItem):
+    """create item in wikidata or wikibase. add claims to new item."""
     errors = []
     item_changed = 0
     if data.wiki_instance == "wikidata":
