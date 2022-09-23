@@ -44,6 +44,19 @@ def read_wikidata_item(item_id: str):
         raise HTTPException(status_code=404, detail="Item not found")
 
     site = pywikibot.Site("wikidata", "wikidata")
+    return get_wiki_item(site, item_id)
+
+
+@app.get("/wikibase_item/{item_id}")
+def read_wikibase_item(item_id: str):
+    if not re.search(r"^Q[0-9]+$", item_id):
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    site = pywikibot.Site("en", "cawiki")
+    return get_wiki_item(site, item_id)
+
+
+def get_wiki_item(site, item_id):
     repo = site.data_repository()
     item = pywikibot.ItemPage(repo, item_id)
 
