@@ -1,5 +1,6 @@
 import re
 import json
+import datetime
 
 from dotenv import load_dotenv
 
@@ -198,7 +199,35 @@ def create_item_statements(item, wikidata_repo, wiki_instance, data, errors):
                 # wd.add_reference(repo, statement, 'P?', "https://example.com")
             except:
                 errors.append(
-                    f'Statement for "{data["labels"]["en"]}" "{pid}" not created.'
+                    f'Statement for "{data.data["labels"]["en"]}" "{pid}" not created.'
+                )
+        elif statement["data_type"] == "time":
+            raw_time = statement["data_value"]["value"]
+            pid = statement["property"]
+
+            # matches '2010'
+            if re.match("^\d{4}$", raw_time):
+                claim_value = pywikibot.WbTime(
+                    year=int(raw_time),
+                )
+            # matches 'January 10 2010'
+            elif re.match("^(\w+) (\d+) (\d{4})$", raw_time):
+                parsed_time = datetime.datetime.strptime(raw_time, "%B %d %Y")
+                claim_value = pywikibot.WbTime(
+                    year=parsed_time.year, month=parsed_time.month, day=parsed_time.day
+                )
+            else:
+                raise (ValueError("invalid date: " + raw_time))
+
+            try:
+                # NOTE: must use wikidata_repo for federated claims
+                statement = wd.add_claim(wikidata_repo, item, pid, claim_value)
+                # TODO: add references
+                # wd.add_reference(repo, statement, 'P?', "https://example.com")
+            except:
+                errors.append(
+                    f'Statement for "{data.data["labels"]["en"]}" ',
+                    '"{pid}" "{claim_value}" not created.',
                 )
         else:
             errors.append(f"{statement['data_type']} not implemented.")
