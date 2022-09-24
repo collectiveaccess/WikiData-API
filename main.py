@@ -151,8 +151,9 @@ def create_wiki_item(data: WikiItem):
     # create item
     try:
         itemData = format_item_data(data)
-        item = wd.create_item(site, itemData)
-        item_changed = 1
+        item = wd.create_item(site, itemData, validation=False)
+        if item:
+            item_changed = 1
     except ValueError as err:
         errors.append(str(err))
     except:
