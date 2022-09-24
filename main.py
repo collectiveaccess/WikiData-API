@@ -243,5 +243,12 @@ def get_claim_item(wiki_instance, qid):
     else:
         local_site = pywikibot.Site("en", "cawiki")
         site = pywikibot.Site("wikidata", "wikidata")
-        results = wd.import_wikidata_item_to_local_wikibase(qid, site, local_site)
+        results = wd.import_wikidata_item_to_local_wikibase(
+            qid,
+            site,
+            local_site,
+            add_statements=False,
+            add_sources=False,
+            limit_languages=True,
+        )
         return results["item"]
