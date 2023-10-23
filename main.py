@@ -1,6 +1,7 @@
 import re
 import json
 import datetime
+import os
 
 from dotenv import load_dotenv
 
@@ -102,7 +103,7 @@ def copy_wikidata_item(data: WikidataId):
     wd.login(site)
 
     # results['id'] is wikibase qid
-    results = wd.import_wikidata_item_to_local_wikibase(data.qid, site, local_site)
+    results = wd.import_wikidata_item_to_local_wikibase(data.qid, site, local_site, os.environ.get("LOCAL_WIKIBASE"))
     update_ca_record_local_wiki_qid(data.table, results["id"], data.ca_id)
 
     content = {"message": f"{results['label']} {results['id']} added to local Wikibase"}
@@ -248,6 +249,7 @@ def get_claim_item(wiki_instance, qid):
             qid,
             site,
             local_site,
+            os.environ.get("LOCAL_WIKIBASE"),
             add_statements=False,
             add_sources=False,
             limit_languages=True,
